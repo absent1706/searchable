@@ -1,6 +1,9 @@
 Searchable, a search trait for Laravel
 ==========================================
 
+**It's a fork intended to be standalone, decoupled from Laravel!**
+**For MySQL only!**
+
 Searchable is a trait for Laravel 4.2+ and Laravel 5.0 that adds a simple search function to Eloquent Models.
 
 Searchable allows you to perform searches in a table giving priorities to each field for the table and it's relations.
