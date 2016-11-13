@@ -1,6 +1,7 @@
 Searchable, a search trait for Laravel
 ==========================================
 
+# FORK NOTES
 **It's a fork intended to be standalone, decoupled from Laravel!**
 **For MySQL only!**
 
