@@ -2,8 +2,9 @@
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
+/* CUSTOMIZATION 0. do NOT use facades*/
+// use Illuminate\Support\Facades\Config;
+// use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -13,6 +14,10 @@ use Illuminate\Support\Str;
  * @property string $table
  * @property string $primaryKey
  * @method string getTable()
+ */
+
+/**
+ * Trait was customized to be used outside of Laravel (to not use facades)
  */
 trait SearchableTrait
 {
@@ -104,8 +109,12 @@ trait SearchableTrait
      * @return array
      */
     protected function getDatabaseDriver() {
-        $key = $this->connection ?: Config::get('database.default');
-        return Config::get('database.connections.' . $key . '.driver');
+        /* CUSTOMIZATION 1*/
+        return 'mysql';
+        // echo 'here';
+        // $key = $this->connection ?: Config::get('database.default');
+        // echo 'here2';
+        // return Config::get('database.connections.' . $key . '.driver');
     }
 
     /**
@@ -117,14 +126,16 @@ trait SearchableTrait
     {
         if (array_key_exists('columns', $this->searchable)) {
             $driver = $this->getDatabaseDriver();
-            $prefix = Config::get("database.connections.$driver.prefix");
+            /* CUSTOMIZATION 2*/
+            $prefix = '';// Config::get("database.connections.$driver.prefix");
             $columns = [];
             foreach($this->searchable['columns'] as $column => $priority){
                 $columns[$prefix . $column] = $priority;
             }
             return $columns;
         } else {
-            return DB::connection()->getSchemaBuilder()->getColumnListing($this->table);
+            // return DB::connection()->getSchemaBuilder()->getColumnListing($this->table);
+            throw new \Exception('$this->columns are absent in model. Please set it');
         }
     }
 
@@ -331,11 +342,16 @@ trait SearchableTrait
      * @param \Illuminate\Database\Eloquent\Builder $original
      */
     protected function mergeQueries(Builder $clone, Builder $original) {
-        $tableName = DB::connection($this->connection)->getTablePrefix() . $this->getTable();
+        /* CUSTOMIZATION 3*/
+        // $tableName = DB::connection($this->connection)->getTablePrefix() . $this->getTable();
+        $tableName = $this->getTable();
+
         if ($this->getDatabaseDriver() == 'pgsql') {
-            $original->from(DB::connection($this->connection)->raw("({$clone->toSql()}) as {$tableName}"));
+            $original->from(new Expression("({$clone->toSql()}) as {$tableName}"));
         } else {
-            $original->from(DB::connection($this->connection)->raw("({$clone->toSql()}) as `{$tableName}`"));
+            /* CUSTOMIZATION 4*/
+            $original->from(new Expression("({$clone->toSql()}) as `{$tableName}`"));
+            // $original->from("({$clone->toSql()}) as `{$tableName}`");
         }
         $original->mergeBindings($clone->getQuery());
     }
